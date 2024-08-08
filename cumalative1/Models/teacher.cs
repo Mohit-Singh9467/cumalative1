@@ -13,5 +13,7 @@ namespace cumalative1.Models
         public string employeenumber;
         public string hiredate;
         public string salary;
+
+        public Teacher() { }
     }
 }

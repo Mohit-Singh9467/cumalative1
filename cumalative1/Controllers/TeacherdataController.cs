@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using Mysqlx.Datatypes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -14,7 +15,7 @@ namespace cumalative1.Controllers
     {
         private SchoolDbContext school = new SchoolDbContext();
 
-        //This Controller Will access the authors table of our blog database.
+        //This Controller Will access the a table of our blog database.
         /// <summary>
         /// Returns a list of Authors in the system
         /// </summary>
@@ -123,5 +124,82 @@ namespace cumalative1.Controllers
 
             return Newteacher;
         }
+        /// <summary>
+        /// Deletes an Author from the connected MySQL Database if the ID of that author exists. Does NOT maintain relational integrity.
+        /// </summary>
+        /// <param name="id">The ID of the author.</param>
+        /// <example>POST /api/AuthorData/DeleteAuthor/3</example>
+        [HttpPost]
+        public void DeleteTeacher(int id)
+        {
+            //Create an instance of a connection
+            MySqlConnection Conn = school.AccessDatabase();
+
+            //Open the connection between the web server and database
+            Conn.Open();
+
+            //Establish a new command (query) for our database
+            MySqlCommand cmd = Conn.CreateCommand();
+
+            //SQL QUERY
+            cmd.CommandText = "Delete from teachers where teacherid=@id";
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Prepare();
+
+            cmd.ExecuteNonQuery();
+
+            Conn.Close();
+
+
+        }
+
+        /// <summary>
+        /// Adds an Author to the MySQL Database.
+        /// </summary>
+        /// <param name="NewTeacher">An object with fields that map to the columns of the author's table.</param>
+        /// <example>
+        /// POST api/AuthorData/AddAuthor 
+        /// FORM DATA / POST DATA / REQUEST BODY 
+        /// {
+        ///	"AuthorFname":"Christine",
+        ///	"AuthorLname":"Bittle",
+        ///	"AuthorBio":"Likes Coding!",
+        ///	"AuthorEmail":"christine@test.ca"
+        /// }
+        /// </example>
+        [HttpPost]
+       // [EnableCors(origins: "*", methods: "*", headers: "*")]
+        public void AddTeacher([FromBody] Teacher NewTeacher)
+        {
+            //Create an instance of a connection
+            MySqlConnection Conn = school.AccessDatabase();
+
+            Debug.WriteLine(NewTeacher.teacherFname);
+
+            //Open the connection between the web server and database
+            Conn.Open();
+
+            //Establish a new command (query) for our database
+            MySqlCommand cmd = Conn.CreateCommand();
+
+            //SQL QUERY
+            cmd.CommandText = "insert into teachers (teacherId, teacherFname, teacherlname, employeenumber, hiredate, salary) values " +
+                "(@teacherId, @teacherFname, @teacherlname, @employeenumber, @hiredate, @salary)";
+            cmd.Parameters.AddWithValue("@teacherId", NewTeacher.teacherId);
+            cmd.Parameters.AddWithValue("@teacherFname", NewTeacher.teacherFname);
+            cmd.Parameters.AddWithValue("@teacherlname", NewTeacher.teacherlname);
+            cmd.Parameters.AddWithValue("@employeenumber", NewTeacher.employeenumber);
+            cmd.Parameters.AddWithValue("@hiredate", NewTeacher.hiredate);
+            cmd.Parameters.AddWithValue("@salary", NewTeacher.salary);
+            cmd.Prepare();
+
+            cmd.ExecuteNonQuery();
+
+            Conn.Close();
+
+
+
+        }
+
     }
 }
